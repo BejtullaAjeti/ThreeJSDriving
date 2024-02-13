@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "cannon": "^0.6.2",
+    "cannon-es": "^0.20.0",
+    "cannon-es-debugger": "^1.0.0",
+    "gltf-loader": "^1.0.0",
+    "gui": "^0.14.1",
+    "stats.js": "^0.17.0",
+    "three": "^0.158.0",
+    "three-gltf-loader": "^1.111.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.161.2",
+    "dat.gui": "^0.7.9"
+  }
+}
