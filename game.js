@@ -22,7 +22,7 @@ const skybox = new THREE.Mesh(skyGeometry, skyMaterial);
 scene.add(skybox);
 
 // Adjust lighting
-const ambientLight = new THREE.AmbientLight(0x404040); // Ambient light to illuminate the scene
+const ambientLight = new THREE.AmbientLight(0x999999); // Ambient light to illuminate the scene
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.25); // Directional light for shadows
@@ -42,7 +42,7 @@ const camera = new THREE.PerspectiveCamera(
     60,
     window.innerWidth / window.innerHeight,
     0.1,
-    10000
+    600
 );
 
 const chaseCam = new THREE.Object3D();
@@ -54,12 +54,7 @@ scene.add(chaseCam);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
-
-const phongMaterial = new THREE.MeshPhongMaterial();
-const wheelColor = new THREE.MeshPhongMaterial({ color: 0x333333 }); // Dark Grey
 
 // Assuming you have textures loaded and ready to use
 const sideTexture = new THREE.TextureLoader().load('textures/wheelside.png');
@@ -83,8 +78,8 @@ groundMaterial.friction = 0.5;
 groundMaterial.restitution = 0;
 
 const wheelMaterial = new CANNON.Material('wheelMaterial');
-wheelMaterial.friction = 20;
-wheelMaterial.restitution = 0.25;
+wheelMaterial.friction = 5;
+wheelMaterial.restitution = 0.5;
 
 // Load the grass texture
 const grassTexture = new THREE.TextureLoader().load('textures/grass.jpg');
@@ -106,8 +101,8 @@ groundBody.addShape(groundShape);
 groundBody.position.set(0, -1, 0);
 world.addBody(groundBody);
 
-const gridSize = 26;
-const roadWidth = 26;
+const gridSize = 28;
+const roadWidth = 28;
 const buildingWidth = 24;
 const buildingHeight = 32;
 
@@ -126,7 +121,7 @@ function createRoad(x, z, length, rotation) {
     // Apply asphalt texture to the road
     const texture = new THREE.TextureLoader().load('textures/asphalt.jpg');
     const roadMaterial = new THREE.MeshStandardMaterial({ map: texture });
-    roadMaterial.friction = 0.34; // Adjust the friction value for the road
+    roadMaterial.friction = 0.25; // Adjust the friction value for the road
     roadMaterial.restitution = 0.1;
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
     road.position.set(x, 0, z);
@@ -188,7 +183,7 @@ const mapData = `
 |RBRBBBRRRBBBRRRBR|
 |RBBBBBRRRBBBBRRBB|
 |RRRRRRRRRRRRRRRRR|
---------------------------
+-------------------
 `;
 
 const rows = mapData.trim().split('\n');
@@ -242,14 +237,13 @@ loader.load('car1.glb', (gltf) => {
     world.addBody(carBody);
 });
 
-const carBodyShape = new CANNON.Box(new CANNON.Vec3(1.35, 0, 3));
+const carBodyShape = new CANNON.Box(new CANNON.Vec3(1.35, 0.5, 3));
 
-const carBody = new CANNON.Body({ mass: 250 });
+const carBody = new CANNON.Body({ mass: 325 });
 carBody.addShape(carBodyShape);
 carBody.position.copy(carBodyMesh.position);
 world.addBody(carBody);
 
-const wheelDampingFactor = 0.75;
 const maxSteeringAngle = 0.75;
 
 // front left wheel
@@ -369,6 +363,7 @@ function onWindowResize() {
 
 const clock = new THREE.Clock();
 let delta;
+
 const audioLoader = new THREE.AudioLoader();
 let ambientSound;
 const listener = new THREE.AudioListener();
@@ -399,12 +394,12 @@ function setupAudio() {
     oscillator.start();
 
     const gainNode = audioContext.createGain();
-    gainNode.gain.value = 2;
+    gainNode.gain.value = 1;
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
-    let baseFrequency = 25;
+    let baseFrequency = 12;
     let speedMultiplier = 0.75;
 
     function updateEngineSound() {
@@ -436,8 +431,8 @@ const rainGroup = new THREE.Group();
 scene.add(rainGroup);
 
 const maxRadius = 10;
-const maxYPosition = 25;
-const maxRaindrops = 500;
+const maxYPosition = 5;
+const maxRaindrops = 200;
 
 function createRaindrop() {
     if (rainGroup.children.length < maxRaindrops) {
@@ -560,9 +555,9 @@ function animate() {
     );
 
     const steeringReturnSpeed = 0.005; 
-    const topSpeed = 75; 
+    const topSpeed = 100; 
     const acceleration = 0.05; 
-    const deceleration = 0.1; 
+    const deceleration = 0.15; 
     const brakingPower = 0.2; 
     thrusting = false;
     
@@ -576,7 +571,7 @@ function animate() {
         if (forwardVelocity > 0) {
             forwardVelocity = Math.max(0, forwardVelocity - brakingPower);
         } else {
-            forwardVelocity = Math.min(-topSpeed / 15, forwardVelocity + acceleration);
+            forwardVelocity = Math.min(-topSpeed / 10, forwardVelocity + acceleration);
         }
         thrusting = true;
     } else {
@@ -609,8 +604,8 @@ function animate() {
             forwardVelocity = Math.min(0, forwardVelocity + deceleration);
         }
     }
-    constraintLB.setMotorSpeed(forwardVelocity * 0.95);
-    constraintRB.setMotorSpeed(forwardVelocity * 0.95);
+    constraintLB.setMotorSpeed(forwardVelocity);
+    constraintRB.setMotorSpeed(forwardVelocity);
     constraintLF.axisA.z = rightVelocity;
     constraintRF.axisA.z = rightVelocity;
 
@@ -623,7 +618,7 @@ function animate() {
     if (v.y < 1.5) {
         v.y = 1.5;
     }
-    camera.position.lerpVectors(camera.position, v, 0.05);
+    camera.position.lerpVectors(camera.position, v, 0.015);
 
     render();
     createRaindrop();
