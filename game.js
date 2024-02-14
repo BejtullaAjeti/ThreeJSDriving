@@ -22,10 +22,10 @@ const skybox = new THREE.Mesh(skyGeometry, skyMaterial);
 scene.add(skybox);
 
 // Adjust lighting
-const ambientLight = new THREE.AmbientLight(0x999999); // Ambient light to illuminate the scene
+const ambientLight = new THREE.AmbientLight(0x444444); // Ambient light to illuminate the scene
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.25); // Directional light for shadows
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Directional light for shadows
 directionalLight.position.set(0, 100, 50);
 directionalLight.castShadow = true;
 directionalLight.shadow.mapSize.width = 4096;
@@ -121,7 +121,7 @@ function createRoad(x, z, length, rotation) {
     // Apply asphalt texture to the road
     const texture = new THREE.TextureLoader().load('textures/asphalt.jpg');
     const roadMaterial = new THREE.MeshStandardMaterial({ map: texture });
-    roadMaterial.friction = 0.25; // Adjust the friction value for the road
+    roadMaterial.friction = 0.3; // Adjust the friction value for the road
     roadMaterial.restitution = 0.1;
     const road = new THREE.Mesh(roadGeometry, roadMaterial);
     road.position.set(x, 0, z);
@@ -183,7 +183,7 @@ const mapData = `
 |RBRBBBRRRBBBRRRBR|
 |RBBBBBRRRBBBBRRBB|
 |RRRRRRRRRRRRRRRRR|
--------------------
+--------------------
 `;
 
 const rows = mapData.trim().split('\n');
@@ -239,7 +239,7 @@ loader.load('car1.glb', (gltf) => {
 
 const carBodyShape = new CANNON.Box(new CANNON.Vec3(1.35, 0.5, 3));
 
-const carBody = new CANNON.Body({ mass: 325 });
+const carBody = new CANNON.Body({ mass: 225 });
 carBody.addShape(carBodyShape);
 carBody.position.copy(carBodyMesh.position);
 world.addBody(carBody);
@@ -314,28 +314,28 @@ const rightBackAxis = new CANNON.Vec3(1, 0, 0);
 const constraintLF = new CANNON.HingeConstraint(carBody, wheelLFBody, {
     pivotA: new CANNON.Vec3(-1.05, -0.4, -2.15),
     axisA: leftFrontAxis,
-    maxForce: 155,
+    maxForce: 100,
 });
 world.addConstraint(constraintLF);
 
 const constraintRF = new CANNON.HingeConstraint(carBody, wheelRFBody, {
     pivotA: new CANNON.Vec3(1.05, -0.4, -2.15),
     axisA: rightFrontAxis,
-    maxForce: 155,
+    maxForce: 100,
 });
 world.addConstraint(constraintRF);
 
 const constraintLB = new CANNON.HingeConstraint(carBody, wheelLBBody, {
     pivotA: new CANNON.Vec3(-1.05, -0.4, 1.8),
     axisA: leftBackAxis,
-    maxForce: 155,
+    maxForce: 100,
 });
 world.addConstraint(constraintLB);
 
 const constraintRB = new CANNON.HingeConstraint(carBody, wheelRBBody, {
     pivotA: new CANNON.Vec3(1.05, -0.4, 1.8),
     axisA: rightBackAxis,
-    maxForce: 155,
+    maxForce: 100,
 });
 world.addConstraint(constraintRB);
 
@@ -426,7 +426,7 @@ document.addEventListener('click', function() {
 
 
 const raindropMaterial = new THREE.MeshBasicMaterial({ color: 0x00aaff });
-const raindropGeometry = new THREE.CylinderGeometry(0.0075, 0.0075, 0.05);
+const raindropGeometry = new THREE.SphereGeometry(0.015, 8, 8);
 const rainGroup = new THREE.Group();
 scene.add(rainGroup);
 
@@ -556,8 +556,8 @@ function animate() {
 
     const steeringReturnSpeed = 0.005; 
     const topSpeed = 100; 
-    const acceleration = 0.05; 
-    const deceleration = 0.15; 
+    const acceleration = 0.1; 
+    const deceleration = 0.75; 
     const brakingPower = 0.2; 
     thrusting = false;
     
