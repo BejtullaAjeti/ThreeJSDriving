@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 
-
 const scene = new THREE.Scene();
 
 // Create a sphere geometry
@@ -52,16 +51,19 @@ chaseCamPivot.position.set(0, 1.75, 7.5);
 chaseCam.add(chaseCamPivot);
 scene.add(chaseCam);
 
+const lowerResolution = 0.375; // Adjust this value to change the lower resolution (e.g., 0.5 means half the resolution)
+
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth * lowerResolution, window.innerHeight * lowerResolution);
+renderer.domElement.style.width = '100%';
+renderer.domElement.style.height = '100%';
+renderer.domElement.style.imageRendering = 'pixelated'; // Optional: maintain pixelation effect
 document.body.appendChild(renderer.domElement);
 
-// Assuming you have textures loaded and ready to use
 const sideTexture = new THREE.TextureLoader().load('textures/wheelside.png');
 const topTexture = new THREE.TextureLoader().load('textures/wheeltop.png');
 const bottomTexture = new THREE.TextureLoader().load('textures/wheeltop.png');
 
-// Create materials using the textures
 const sideMaterial = new THREE.MeshPhongMaterial({ map: sideTexture });
 const topMaterial = new THREE.MeshPhongMaterial({ map: topTexture });
 const bottomMaterial = new THREE.MeshPhongMaterial({ map: bottomTexture });
@@ -205,19 +207,11 @@ for (let i = 0; i < rows.length; i++) {
     }
 }
 
-const carBodyGeometry = new THREE.BoxGeometry(1, 1, 2);
-const carBodyMesh = new THREE.Mesh(carBodyGeometry, bodyColor);
-carBodyMesh.position.y = 2;
-carBodyMesh.castShadow = true;
-scene.add(carBodyMesh);
-carBodyMesh.add(chaseCam);
-
 const loader = new GLTFLoader();
 let newCarModel;
 
 loader.load('car1.glb', (gltf) => {
     newCarModel = gltf.scene;
-    scene.remove(carBodyMesh);
 
     newCarModel.traverse((child) => {
         if (child instanceof THREE.Mesh) {
@@ -225,17 +219,22 @@ loader.load('car1.glb', (gltf) => {
         }
     });
 
-    scene.add(newCarModel);
     newCarModel.castShadow = true;
+    newCarModel.position.y = 2; // Adjust position if necessary
+    scene.add(newCarModel);
 
-    newCarModel.position.copy(carBodyMesh.position);
-    newCarModel.rotation.copy(carBodyMesh.rotation);
-    newCarModel.scale.copy(carBodyMesh.scale);
+    newCarModel.add(chaseCam);
 
-    carBody.position.copy(carBodyMesh.position);
-    carBody.quaternion.copy(carBodyMesh.quaternion);
+    carBody.position.copy(newCarModel.position);
+    carBody.quaternion.copy(newCarModel.quaternion);
     world.addBody(carBody);
 });
+
+const carBodyMesh = new THREE.Mesh(newCarModel, bodyColor);
+carBodyMesh.position.y = 2;
+carBodyMesh.castShadow = true;
+scene.add(carBodyMesh);
+carBodyMesh.add(chaseCam);
 
 const carBodyShape = new CANNON.Box(new CANNON.Vec3(1.35, 0.5, 3));
 
@@ -426,7 +425,7 @@ document.addEventListener('click', function() {
 
 
 const raindropMaterial = new THREE.MeshBasicMaterial({ color: 0x00aaff });
-const raindropGeometry = new THREE.SphereGeometry(0.015, 8, 8);
+const raindropGeometry = new THREE.SphereGeometry(0.015, 8, 8); // Use SphereBufferGeometry
 const rainGroup = new THREE.Group();
 scene.add(rainGroup);
 
@@ -439,10 +438,12 @@ function createRaindrop() {
         const raindrop = new THREE.Mesh(raindropGeometry, raindropMaterial);
         const radius = Math.random() * maxRadius;
         const theta = Math.random() * Math.PI * 2;
+        if(newCarModel){
         const x = radius * Math.cos(theta) + newCarModel.position.x;
         const y = Math.random() * maxYPosition + 5;
         const z = radius * Math.sin(theta) + newCarModel.position.z;
         raindrop.position.set(x, y, z);
+        }
         rainGroup.add(raindrop);
     }
 }
@@ -464,6 +465,7 @@ function updateRain() {
         createRaindrop();
     }
 }
+
 
 // Configure renderer
 renderer.shadowMap.enabled = true;
