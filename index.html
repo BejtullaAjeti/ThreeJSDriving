@@ -1,14 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Driving Game</title>
-</head>
-
-<body>
-    <div id="game-container"></div>
-
-    <script type="module" src="game.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>threejsdriving</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.module.js",
+          "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+        }
+      }
+    </script>
+    <script type="module" src="src/game.js"></script>
+  </body>
 </html>
